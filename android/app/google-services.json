@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "979319697143",
+    "project_id": "qfoods-bb570",
+    "storage_bucket": "qfoods-bb570.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:979319697143:android:bd3ab1b7755482269cedf2",
+        "android_client_info": {
+          "package_name": "com.tkp.qfoods"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "979319697143-5g7t2tflq6eu0rb8467l8qfd59hjsmeh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsKOZfQIizTFllGI3Lsd4q8QvH6haRZaM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "979319697143-5g7t2tflq6eu0rb8467l8qfd59hjsmeh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
