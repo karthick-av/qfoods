@@ -41,6 +41,7 @@ class Items {
   String? weight;
   String? variantsName;
   String? total;
+  int ? variantItemsStatus;
   List<Variants>? variants;
   List<DishVariants>? dishVariants;
 
@@ -50,6 +51,7 @@ class Items {
       this.restaurantId,
       this.restaurantName,
       this.name,
+      this.variantItemsStatus,
       this.image,
       this.quantity,
       this.status,
@@ -81,6 +83,7 @@ class Items {
     weight = json['weight'];
     variantsName = json['variants_name'];
     total = json['total'];
+    variantItemsStatus = json['variant_items_status'];
     if (json['variants'] != null) {
       variants = <Variants>[];
       json['variants'].forEach((v) {
@@ -113,6 +116,7 @@ class Items {
     data['weight'] = this.weight;
     data['variants_name'] = this.variantsName;
     data['total'] = this.total;
+    data['variant_items_status'] = this.variantItemsStatus;
     if (this.variants != null) {
       data['variants'] = this.variants!.map((v) => v.toJson()).toList();
     }
@@ -195,6 +199,7 @@ class VariantItems {
   int? regularPrice;
   int? variantItemId;
   int? offersPercentage;
+  int? status;
 
   VariantItems(
       {this.name,
@@ -206,6 +211,7 @@ class VariantItems {
       this.description,
       this.regularPrice,
       this.variantItemId,
+      this.status,
       this.offersPercentage});
 
   VariantItems.fromJson(Map<String, dynamic> json) {
@@ -219,6 +225,7 @@ class VariantItems {
     regularPrice = json['regular_price'];
     variantItemId = json['variant_item_id'];
     offersPercentage = json['offers_percentage'];
+    status = json['status'];
   }
 
   Map<String, dynamic> toJson() {
@@ -233,6 +240,7 @@ class VariantItems {
     data['regular_price'] = this.regularPrice;
     data['variant_item_id'] = this.variantItemId;
     data['offers_percentage'] = this.offersPercentage;
+    data['status'] = this.status;
     return data;
   }
 }

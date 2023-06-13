@@ -56,7 +56,8 @@ Future<List<GroceryHomeCarousel>>groceryHomeCarouselHandler() async{
     
     if(response.statusCode == 200){
        var response_body = json.decode(response.body);
-       
+       print(response_body);
+       print(ApiServices.grocery_home_tags);
        for(var json in response_body){
      
       groceryHomeTagsModel.add(GroceryHomeTagsModel.fromJson(json));

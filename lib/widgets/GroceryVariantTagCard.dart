@@ -67,6 +67,22 @@ class GroceryVariantTagCard extends StatelessWidget {
                               ),
 
                               (
+                                variantsProducts?.status == 0 ?
+                                Container(
+                                  width: ScreenUtil().setWidth(100),
+                                 alignment: Alignment.center,
+                                 child: Container(
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Color(0XFFD3D3D3))
+                                  ),
+                                  child: Text("unavailable", style: TextStyle(color: Color(0XFFbdbdbd), fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12)),),
+                                 ),
+                               )
+
+:
+   
                                  groceryProvider!.loadingId == 'v${variantsProducts!.id}'
                                 ? Container(
                                   margin:  EdgeInsets.only(right: ScreenUtil().setSp(20)),

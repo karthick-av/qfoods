@@ -366,6 +366,8 @@ Widget PlaceOrder(){
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<GroceryCartProvider>(context, listen: true);
        double width = MediaQuery.of(context).size.width;
+        int unavailable = cartProvider?.CartData?.items?.where((e) => e?.status == 0)?.length ?? 0;
+
   //    bottomSheet: bottombtn == "total" ? PlaceOrder() : (bottombtn == "out_of_location" ? OutOfLocation() : SizedBox()),
        
     return WillPopScope(
@@ -374,7 +376,7 @@ Widget PlaceOrder(){
         children: [
           Scaffold(
             backgroundColor: AppColors.whitecolor,
-           bottomSheet: bottombtn == "total" ? PlaceOrder() : (bottombtn == "out_of_location" ? OutOfLocation() : SizedBox()),
+           bottomSheet: unavailable > 0 ? unavailableContainer(width) : (bottombtn == "total" ? PlaceOrder() : (bottombtn == "out_of_location" ? OutOfLocation() : SizedBox())),
          body: SafeArea(
               child: Column(
                 children: [
@@ -827,4 +829,50 @@ children:  [
       ]),
     );
   }
+
+  Widget unavailableContainer(double width){
+  return Container(
+      height: ScreenUtil().setHeight(58.0),
+      width: width,
+      padding:  const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        offset: Offset(0, 4),
+                        blurRadius: 20,
+                        color: const Color(0xFFB0CCE1).withOpacity(0.60),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.warning, color: AppColors.primaryColor, size: ScreenUtil().setSp(25),),
+                      SizedBox(width: 10,),
+                      Column(
+                        children: [
+                          Container(
+                            width: width * 0.80,
+                            child: Text(
+                              overflow: TextOverflow.ellipsis,
+  maxLines: 3,
+                              "Some Items Currently are not available", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(13), fontWeight: FontWeight.bold),))
+                       
+                       ,
+                       SizedBox(height: 5,),
+                        Container(
+                            width: width * 0.80,
+                            child: Text(
+                              overflow: TextOverflow.ellipsis,
+  maxLines: 3,
+                              "Please remove items from Cart", style: TextStyle(color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(11), fontWeight: FontWeight.normal),))
+                       
+                        ],
+                      )
+                    ],
+                  ),
+  );
+}
 }

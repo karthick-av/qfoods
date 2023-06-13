@@ -53,30 +53,54 @@ final cartProvider = Provider.of<GroceryCartProvider>(context, listen: true).Car
                       ),
                     ),
                      SizedBox(height: 10.0,),
-                     Padding(padding: EdgeInsets.only(left: 10.0),
-                     child: Column(
+                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          products!.name!.toString(), maxLines: 1, overflow: TextOverflow.ellipsis,style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(13.0)),),
-                      Text(products!.weight!.toString(), maxLines: 1, overflow: TextOverflow.ellipsis,style: TextStyle(fontFamily: FONT_FAMILY, color: AppColors.greycolor, fontSize: ScreenUtil().setSp(11.0))),
-                   Row(
-                      children: [
-                       
-                        Text("Rs ${products!.price!.toString()}",maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontWeight: FontWeight.w600,fontSize: ScreenUtil().setSp(12.0)),),
-                      
-                       if(products!.salePrice != 0 && products!.offers == "true")
-                        Text("Rs ${products!.regularPrice!.toString()}",maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(decoration: TextDecoration.lineThrough,color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontWeight: FontWeight.w500,fontSize: ScreenUtil().setSp(12.0)),),
-                       
-                      ],
-                    ),
-                    (products!.variant == "true" && products!.variantsItems!.length > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                              Text(
+                            products!.name!.toString(), maxLines: 1, overflow: TextOverflow.ellipsis,style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(13.0)),),
+                        Text(products!.weight!.toString(), maxLines: 1, overflow: TextOverflow.ellipsis,style: TextStyle(fontFamily: FONT_FAMILY, color: AppColors.greycolor, fontSize: ScreenUtil().setSp(11.0))),
+                                         Row(
+                        children: [
+                         
+                          Text("Rs ${products!.price!.toString()}",maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontWeight: FontWeight.w600,fontSize: ScreenUtil().setSp(12.0)),),
+                        
+                         if(products!.salePrice != 0 && products!.offers == "true")
+                          Text("Rs ${products!.regularPrice!.toString()}",maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(decoration: TextDecoration.lineThrough,color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontWeight: FontWeight.w500,fontSize: ScreenUtil().setSp(12.0)),),
+                        
+                          ],
+                        ) 
+                        ],
+                                          ),
+                      ),
+                   (
+                    products?.status == 0
+                    ?
+                    Container(
+                                  width: ScreenUtil().setWidth(100),
+                                 alignment: Alignment.center,
+                                 child: Container(
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Color(0XFFD3D3D3))
+                                  ),
+                                  child: Text("unavailable", style: TextStyle(color: Color(0XFFbdbdbd), fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12)),),
+                                 ),
+                               ) 
+                    
+                    
+                    : (products!.variant == "true" && products!.variantsItems!.length > 0)
                     ?  InkWell(
                       onTap: (){
                         GroceryVariantTagBottomSheet().bottomDetailsTagSheet(products, context);
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(2.0),
+                        padding: const EdgeInsets.only(left: 10),
                         // decoration: BoxDecoration(
                         //   border: Border.all(
                         //     color: AppColors.primaryColor
@@ -149,8 +173,10 @@ final cartProvider = Provider.of<GroceryCartProvider>(context, listen: true).Car
                      )
                   )
                      )
+
+                     )
+
                       ],
-                     ),
                      )
                       ],
                   ),

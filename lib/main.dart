@@ -32,6 +32,7 @@ await Firebase.initializeApp();
  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 NotificationService.initalize();
 
+
   runApp(GetMaterialApp(
     debugShowCheckedModeBanner: false,
     home: MyApp()));

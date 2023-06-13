@@ -1,7 +1,7 @@
 
 class ApiServices{
   ApiServices._();
-    static  const BASEURL = "https://qfoods-server.onrender.com/";
+    static  const BASEURL = "http://192.168.10.5:1999/";
      static const SOCKET_ORDER_URL = "${BASEURL}order";
 
 

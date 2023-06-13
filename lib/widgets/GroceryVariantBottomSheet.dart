@@ -78,7 +78,7 @@ class GroceryVariantBottomSheet{
 class GroceryVariantTagBottomSheet{
   Future<void> bottomDetailsTagSheet(Products products, BuildContext context) {
        double width = MediaQuery.of(context).size.width;
-
+print("dichsd");
    
  return  showModalBottomSheet(
     context: context,
@@ -102,7 +102,7 @@ class GroceryVariantTagBottomSheet{
               Expanded(
                 child: SingleChildScrollView(
                   
-                  physics: const BouncingScrollPhysics(),
+                  //physics: const NeverScrollableScrollPhysics(),
                   child: Column(
                       children: [
                         
@@ -116,22 +116,27 @@ class GroceryVariantTagBottomSheet{
                                  Text("${products?.variantsItems?[index]?.name ?? ''}", style: TextStyle(fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(13.0), color: AppColors.blackcolor, fontWeight: FontWeight.bold),),
                                  ListView.builder(
                                   physics: NeverScrollableScrollPhysics(),
-                                  padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(100)),
+                                //  padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(100)),
                                   shrinkWrap: true,
-                                  controller: controller,
+                                //  controller: controller,
                                            itemCount: products!.variantsItems![index]!.variantsProducts!.length,
                                 itemBuilder: (_, i){
                                  return GroceryVariantTagCard(variantsProducts: products!.variantsItems![index]!.variantsProducts![i], products: products);          
+                                
                                 }
-                                 )
+                                 ),
+                    
                             ]
                           )
                         )
-                           )    
+                           )  ,
+                SizedBox(height: 100,)
+            
                       ],
                     ),
                 ),
               ),
+            
             ],
           );
         },

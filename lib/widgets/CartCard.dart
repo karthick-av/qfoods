@@ -123,7 +123,25 @@ children:  [
                                     ),
                                   ),
                                
-                               cartProvider?.CartData?.items?[index]?.status == 0
+                              (  
+
+(
+
+(
+(cartProvider?.CartData?.items?[index]?.variants?.length ?? 0) > 0 && cartProvider?.CartData?.items?[index]?.variantItemsStatus == 0 ) ?
+  Container(
+                                  width: width * 0.30,
+                                 alignment: Alignment.center,
+                                 child: Container(
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Color(0XFFD3D3D3))
+                                  ),
+                                  child: Text("unavailable", style: TextStyle(color: Color(0XFFbdbdbd), fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12)),),
+                                 ),
+                               ) 
+: (cartProvider?.CartData?.items?[index]?.status == 0
                                ?
                                Container(
                                   width: width * 0.30,
@@ -202,6 +220,13 @@ children:  [
                                           ],
                                         ),
                                       )
+                               ))
+ 
+)
+
+
+                                                             
+                               
                                )
                                 ],
                                ),
