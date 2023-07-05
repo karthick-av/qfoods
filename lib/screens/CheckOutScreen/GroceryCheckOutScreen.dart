@@ -5,6 +5,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:qfoods/Provider/GroceryCartProvider.dart';
 import 'package:qfoods/constants/CustomSnackBar.dart';
@@ -41,8 +42,11 @@ CheckouttotalModel? _checkouttotal;
 String? bottombtn = "";
 final scrollDirection = Axis.vertical;
 
+ TextEditingController couponController = TextEditingController();
+
   late AutoScrollController controller;
 
+  final formGlobalKey = GlobalKey < FormState > ();
 void initState(){
   controller = AutoScrollController(
         viewportBoundaryGetter: () =>
@@ -56,7 +60,50 @@ void initState(){
 
 void dispose(){
   controller?.dispose();
+  couponController?.dispose();
   super.dispose();
+}
+
+Future<void> ApplyCouponHandler() async{
+  try{
+    context.loaderOverlay.show();
+
+            FocusScopeNode currentFocus = FocusScope.of(context);
+    if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+       currentFocus.focusedChild?.unfocus();
+    }
+
+
+    dynamic data = {
+      "user_id": "1",
+      "latitude": widget.checkOut?.latitude?.toString(),
+      "longitude": widget.checkOut?.longitude?.toString(),
+      "code": couponController.value.text
+    };
+ var response = await http.post(Uri.parse(ApiServices.apply_grocery_coupon), body: data);
+ context.loaderOverlay.hide();
+   if(response.statusCode == 200){
+      final responsebody = json.decode(response.body);
+      setState(() {
+        loading = false;
+      });
+      if(responsebody["message"] != null){
+       CustomSnackBar().ErrorMsgSnackBar(responsebody["message"]);
+      }else{
+        print(responsebody);
+      couponController.clear();
+      
+        CheckouttotalModel checkOut_total = CheckouttotalModel.fromJson(responsebody);
+        _checkouttotal = checkOut_total;
+            bottombtn = "total";
+       
+        setState(() { });
+               
+      }
+   }
+  }catch(e){
+ context.loaderOverlay.hide();
+  }
 }
 
 
@@ -85,7 +132,8 @@ try{
   "address2": widget?.checkOut?.address2?.toString() ?? "","landmark": widget?.checkOut?.landMark?.toString() ?? "",
    "alternate_phone_number": widget?.checkOut?.alternate_phone_number?.toString() ?? "", 
    "instructions": widget?.checkOut?.instructions?.toString() ?? "",
-   "payment_id": payment_id?.toString() ?? "0"
+   "payment_id": payment_id?.toString() ?? "0",
+   "code": _checkouttotal?.couponCode ?? ''
   };
 
     var response = await http.post(Uri.parse(ApiServices.grocery_create_order), body: data);
@@ -377,424 +425,614 @@ Widget PlaceOrder(){
           Scaffold(
             backgroundColor: AppColors.whitecolor,
            bottomSheet: unavailable > 0 ? unavailableContainer(width) : (bottombtn == "total" ? PlaceOrder() : (bottombtn == "out_of_location" ? OutOfLocation() : SizedBox())),
-         body: SafeArea(
-              child: Column(
-                children: [
-                   Container(
-                   padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 14.0),
-                    decoration: BoxDecoration(
-                      border: Border(bottom: BorderSide(width: 0.8, color: Color(0XFFF0F0F0)))
-                    ),
-                     child: Row(
-                      children: [
-                        InkWell(
-                          onTap: () {
-                  //            Navigator.pushReplacement(
-                  //     context,
-                  //     MaterialPageRoute(builder: (context) => 
-                  //     CartScreen()),
-                  // );
-                 // CheckOutHandler();
-                          },
-                          child: Icon(Icons.arrow_back, color: AppColors.blackcolor, size: ScreenUtil().setSp(25),),
-                        
+         body: GestureDetector(
+            onTap: (){
+              FocusScopeNode currentFocus = FocusScope.of(context);
+          if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+         currentFocus.focusedChild?.unfocus();
+          }
+          },
+           child: SafeArea(
+                child: LoaderOverlay(
+                   useDefaultLoading: false,
+                 overlayWidget: Center(
+            child: SizedBox(width: ScreenUtil().setSp(25), height: ScreenUtil().setSp(25), child: CircularProgressIndicator(
+                                                            strokeWidth: 1.0,
+                                                            color: AppColors.primaryColor,),)
+                 ),
+                
+                  child: Column(
+                    children: [
+                       Container(
+                       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 14.0),
+                        decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide(width: 0.8, color: Color(0XFFF0F0F0)))
                         ),
-                        SizedBox(width: ScreenUtil().setSp(10),),
-                        Text("CheckOut", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.bold),)
-                      ],
-                  ),
-                   ),
-                  Expanded(
-                    child: RefreshIndicator(
-                      color: AppColors.primaryColor,
-                      onRefresh: () async{
-                        await CheckOutHandler();
-                        await cartProvider.getCart();
-                      },
-                      child: SingleChildScrollView(
-                        scrollDirection: scrollDirection,
-        controller: controller,
-                        physics:  AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.only(bottom: ScreenUtil().setHeight(100)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child:
-                          loading ? Loading(context)
-                          : Column(
+                         child: Row(
                           children: [
-                          Center(
-                            child: Container(
-                              width: width * 0.90,
-                                decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: [
-                                BoxShadow(
-                                  offset: Offset(0, 4),
-                                  blurRadius: 20,
-                                  color: const Color(0xFFB0CCE1).withOpacity(0.29),
-                                ),
-                              ],
-                            ),
-                           
-                              child:  ListView.builder(
-                            shrinkWrap: true,
-                              itemCount: cartProvider?.CartData?.items?.length ?? 0,
-                             physics: NeverScrollableScrollPhysics(),
-                            itemBuilder: ((context, index) {
-                             return Container(
-                                     padding: const EdgeInsets.all(5.0),
-                        child: Slidable(
-                                              startActionPane: ActionPane(
-                              extentRatio: 0.25,
-                               motion: const ScrollMotion(),
-children:  [
-      // A SlidableAction can have an icon and/or a label.
-      SlidableAction(
-        onPressed: ((context) {
-           DeleteProductHandler({
-            "user_id": "1",
-            "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
-          });
-        }),
-        backgroundColor: Color(0xFFFE4A49),
-        foregroundColor: Colors.white,
-        icon: Icons.delete,
-        label: 'Delete',
-      )
-    ],
-                             ) ,
-                             endActionPane: ActionPane(
-                              extentRatio: 0.25,
-                               motion: const ScrollMotion(),
-children:  [
-      // A SlidableAction can have an icon and/or a label.
-      SlidableAction(
-         onPressed: ((context) {
-           DeleteProductHandler({
-            "user_id": "1",
-            "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
-          });
-        }),
-        backgroundColor: Color(0xFFFE4A49),
-        foregroundColor: Colors.white,
-        icon: Icons.delete,
-        label: 'Delete',
-      )
-    ],
-                             ) ,
-        
-                          child: Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              Row(
-                                               children: [
-                                                Container(
-                                              margin: const EdgeInsets.only(bottom: 2),
-                                                    width: width * 0.37,
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                     if(cartProvider?.CartData?.items?[index]?.variantid != null)
-                                                    Text("${cartProvider?.CartData?.items?[index]?.productName ?? ""}", maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12), fontWeight: FontWeight.w500,color: AppColors.blackcolor),),
-                                                 
-                                                  Container(
-                                                    width: width /2,
-                                                    child:  Text("${cartProvider?.CartData?.items?[index]?.name ?? ""}",
-                                                    maxLines: 2,
-                                                    overflow: TextOverflow.ellipsis,
-                                                     style:  TextStyle(fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(11), fontWeight: FontWeight.w500,color: AppColors.blackcolor.withOpacity(0.7)),)
-                                                  ,
-                                                  ),
-                                                  Text("Rs ${cartProvider?.CartData?.items?[index]?.price ?? ""}", style:  TextStyle(fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(11), fontWeight: FontWeight.w500,color: AppColors.blackcolor.withOpacity(0.7)),)
-                                                     ,
-                                                     
-                                                     ],
-                                                ),
-                                              ),
-                                                             cartProvider?.CartData?.items?[index]?.status == 0
-                                       ?
-                                       Container(
-                                          width: width * 0.30,
-                                         alignment: Alignment.center,
-                                         child: Container(
-                                          padding: const EdgeInsets.all(5),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(color: Color(0XFFD3D3D3))
-                                          ),
-                                          child: Text("unavailable", style: TextStyle(color: Color(0XFFbdbdbd), fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12)),),
-                                         ),
-                                       )
-                                       :
-                                
-                                           ((cartProvider?.CartData?.items?[index]?.cartId?.toString() == cartProvider.loadingId) ? 
-                                            Container(
-                                              width: width * 0.33,
-                                          alignment: Alignment.center,
-                                              child: Container(
-                                                    child: SizedBox(width: ScreenUtil().setSp(20), height: ScreenUtil().setSp(20), child: CircularProgressIndicator(
-                                                      strokeWidth: 1.0,
-                                                      color: AppColors.primaryColor,),)),
-                                            )
-                                           :   Container(
-                                            width: width * 0.33,
-                                         
-                                                    child: Row(
-                                         mainAxisAlignment: MainAxisAlignment.center,
-                                                      children: [
-                                                        InkWell(
-                                                          onTap: (){
-                                                           
-                                                            if(cartProvider?.CartData?.items?[index]?.variantid != null){
-                                                  UpdateQuantityHandler({
-                                                    "cart_id": cartProvider?.CartData?.items?[index]?.cartId?.toString() ?? "",
-                                                    "type": "minus",
-                                                    "user_id": "1",
-                                                    "product_type": "variant",
-                                                  "latitude": widget.checkOut?.latitude?.toString(),
-                                                              "longitude": widget.checkOut?.longitude?.toString()
-                                                             });
-                                                
-                                                 }else{
-                                        UpdateQuantityHandler({
-                                                    "cart_id": cartProvider?.CartData?.items?[index]?.cartId?.toString() ?? "",
-                                                    "type": "minus",
-                                                    "user_id": "1",
-                                                    "product_type": "",
-                                                  "latitude": widget.checkOut?.latitude?.toString(),
-                                                              "longitude": widget.checkOut?.longitude?.toString()
-                                                  });
-                                                 }
-                                                          },
-                                                          child: Container(
-                                                             decoration: BoxDecoration(
-                                                              color: Colors.white,
-                                                              borderRadius: BorderRadius.circular(4),
-                                                              boxShadow: [
-                                                                BoxShadow(
-                                          offset: Offset(0, 4),
-                                          blurRadius: 20,
-                                          color: const Color(0xFFB0CCE1).withOpacity(0.40),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            padding: const EdgeInsets.all(5),
-                                                            child: Icon(Icons.remove, size: ScreenUtil().setSp(22.0), color: AppColors.primaryColor,)),
-                                                          
-                                                        ),
-                                                        Container(
-                                                          
-                                                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-                                                          child: Text("${cartProvider?.CartData?.items?[index]?.quantity ?? ""}", style: TextStyle(color: AppColors.primaryColor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.bold),),
-                                                        ),
-                                                          InkWell(
-                                                              onTap: (){
-                                                            
-                                                  if(cartProvider?.CartData?.items?[index]?.variantid != null){
-                                                  UpdateQuantityHandler({
-                                                    "cart_id": cartProvider?.CartData?.items?[index]?.cartId?.toString() ?? "",
-                                                    "type": "plus",
-                                                    "user_id": "1",
-                                                    "product_type": "variant",
-                                                  "latitude": widget.checkOut?.latitude?.toString(),
-                                                              "longitude": widget.checkOut?.longitude?.toString()
-                                                  });
-                                                
-                                                 }else{
-                                        UpdateQuantityHandler({
-                                                    "cart_id": cartProvider?.CartData?.items?[index]?.cartId?.toString() ?? "",
-                                                    "type": "plus",
-                                                    "user_id": "1",
-                                                    "product_type": "",
-                                                  "latitude": widget.checkOut?.latitude?.toString(),
-                                                              "longitude": widget.checkOut?.longitude?.toString()
-                                                  });
-                                                 }                   },
-                                                          child: Container(
-                                                              decoration: BoxDecoration(
-                                                              color: Colors.white,
-                                                              borderRadius: BorderRadius.circular(4),
-                                                              boxShadow: [
-                                                                BoxShadow(
-                                          offset: Offset(0, 4),
-                                          blurRadius: 20,
-                                          color: const Color(0xFFB0CCE1).withOpacity(0.40),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            padding: const EdgeInsets.all(5),
-                                                            child: Icon(Icons.add, size: ScreenUtil().setSp(20.0), color: AppColors.primaryColor,)),
-                                                          
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ))
-                                               ],
-                                              ),
-                        
-                                                              cartProvider?.CartData?.items?[index]?.status == 0
-                                       ?  IconButton(onPressed: (){
-                                         DeleteProductHandler({
-                                          "user_id": "1",
-                                          "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
-                                        });  
-                                       }, icon: Icon(Icons.delete, color: AppColors.greycolor,size: ScreenUtil().setSp(20),))
-                                        : 
-                                                  Text("Rs ${cartProvider?.CartData?.items?[index]?.total ?? "" }", style:  TextStyle(fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12), fontWeight: FontWeight.w600,color: AppColors.blackcolor),)
-                                            ],
-                                          ),
-                          ),
-                        ),
-                                    );
-                           })),
-                            ),
-                          ),
-                                  
-                            Center(
-                            child: AutoScrollTag(
-                               key: ValueKey(2),
-        controller: controller,
-        index: 2,
-                              child: Container(
-                                margin:  EdgeInsets.only(top: ScreenUtil().setHeight(20)),
-                                padding: const EdgeInsets.all(14.0),
-                                width: width * 0.90,
-                                  decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: [
-                                  BoxShadow(
-                                    offset: Offset(0, 4),
-                                    blurRadius: 20,
-                                    color: const Color(0xFFB0CCE1).withOpacity(0.29),
-                                  ),
-                                ],
-                                    
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("Payment Method", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14), fontWeight: FontWeight.bold),)
-                                ,ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: _checkouttotal?.paymentMethod?.length ?? 0,
-                                  itemBuilder: (context, index) {
-                                  return Row(
-                                    children: [
-                                     Checkbox(
-                                          activeColor: AppColors.primaryColor,
-                                          hoverColor: AppColors.primaryColor,
-                                        
-                                          value: payment_id == _checkouttotal?.paymentMethod?[index]?.paymentId, 
-                                          onChanged: ((value) {
-                                              payment_id = value! ? (_checkouttotal?.paymentMethod?[index]?.paymentId ?? 0) : 0;
-                                                payment_method_error = false;
-                                            setState(() {
-                                            });
-                                         }))
+                            InkWell(
+                              onTap: () {
+                      //            Navigator.pushReplacement(
+                      //     context,
+                      //     MaterialPageRoute(builder: (context) => 
+                      //     CartScreen()),
+                      // );
+                     // CheckOutHandler();
+                              },
+                              child: Icon(Icons.arrow_back, color: AppColors.blackcolor, size: ScreenUtil().setSp(25),),
                             
-                                         ,Text(_checkouttotal?.paymentMethod?[index]?.paymentName ?? '',
-                                         style: TextStyle(color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(13)),
-                                         )
-                                    ],
-                                  );
-                                })
-                            
-                            
-                            ,
-                            BounceInLeft(
-                              animate: payment_method_error,
-                              child:   Column(
-                              
-                                children: [
-                              
-                                       SizedBox(height: ScreenUtil().setHeight(10),),
-                              
-                                      Text("Please..Select the Payment Method", style: TextStyle(color: Colors.red, fontFamily: FONT_FAMILY, fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(12)),),
-                              
-                                ],
-                              
-                              ),
-                            )
-                            
-                            
-                                ],
-                              ),
-                              ),
                             ),
-                           ),        
-                           Center(
-                            child: Container(
-                              margin:  EdgeInsets.only(top: ScreenUtil().setHeight(20)),
-                              padding: const EdgeInsets.all(14.0),
-                              width: width * 0.90,
-                                decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: [
-                                BoxShadow(
-                                  offset: Offset(0, 4),
-                                  blurRadius: 20,
-                                  color: const Color(0xFFB0CCE1).withOpacity(0.29),
-                                ),
-                              ],
-                                  
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text("Sub Total", style: TextStyle(color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.w500),),
-                                    Text("Rs ${_checkouttotal?.subTotal ?? ''}", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.bold),)
-                                  
-                                  ],
-                                ),
-                                
-                                SizedBox(height: ScreenUtil().setSp(20.0),),
-                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text("Delivery Charges", style: TextStyle(color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.w500),),
-                                        SizedBox(height: 4,),
-                                      //  if(_checkouttotal?.kms != null)
-                                         Text("${_checkouttotal?.kms ?? ''} kms", style: TextStyle(color: AppColors.lightgreycolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(11.0), fontWeight: FontWeight.normal),),
-                                     
-                                      ],
-                                    ),
-                                    Text("Rs ${_checkouttotal?.deliveryCharges ?? ''}", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.bold),)
-                                  
-                                  ],
-                                ),
-                                SizedBox(height: ScreenUtil().setSp(20.0),),
-                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text("Grand Total", style: TextStyle(color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.w500),),
-                                    Text("Rs ${_checkouttotal?.total ?? ''}", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.bold),)
-                                  
-                                  ],
-                                )
-                              ],
-                            ),
-                            ),
-                           )
-                            
+                            SizedBox(width: ScreenUtil().setSp(10),),
+                            Text("CheckOut", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.bold),)
                           ],
                       ),
-                        ),),
-                    ),
+                       ),
+                      Expanded(
+                        child: RefreshIndicator(
+                          color: AppColors.primaryColor,
+                          onRefresh: () async{
+                            await CheckOutHandler();
+                            await cartProvider.getCart();
+                          },
+                          child: Form(
+                            key: formGlobalKey,
+                            child: SingleChildScrollView(
+                              scrollDirection: scrollDirection,
+                                                controller: controller,
+                              physics:  AlwaysScrollableScrollPhysics(),
+                              padding: EdgeInsets.only(bottom: ScreenUtil().setHeight(100)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child:
+                                loading ? Loading(context)
+                                : Column(
+                                children: [
+                                Center(
+                                  child: Container(
+                                    width: width * 0.90,
+                                      decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        offset: Offset(0, 4),
+                                        blurRadius: 20,
+                                        color: const Color(0xFFB0CCE1).withOpacity(0.29),
+                                      ),
+                                    ],
+                                  ),
+                                 
+                                    child:  ListView.builder(
+                                  shrinkWrap: true,
+                                    itemCount: cartProvider?.CartData?.items?.length ?? 0,
+                                   physics: NeverScrollableScrollPhysics(),
+                                  itemBuilder: ((context, index) {
+                                   return Container(
+                                           padding: const EdgeInsets.all(5.0),
+                              child: Slidable(
+                                                    startActionPane: ActionPane(
+                                    extentRatio: 0.25,
+                                     motion: const ScrollMotion(),
+                                        children:  [
+                                              // A SlidableAction can have an icon and/or a label.
+                                              SlidableAction(
+                                                onPressed: ((context) {
+                             DeleteProductHandler({
+                              "user_id": "1",
+                              "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
+                            });
+                                                }),
+                                                backgroundColor: Color(0xFFFE4A49),
+                                                foregroundColor: Colors.white,
+                                                icon: Icons.delete,
+                                                label: 'Delete',
+                                              )
+                                            ],
+                                   ) ,
+                                   endActionPane: ActionPane(
+                                    extentRatio: 0.25,
+                                     motion: const ScrollMotion(),
+                                        children:  [
+                                              // A SlidableAction can have an icon and/or a label.
+                                              SlidableAction(
+                                                 onPressed: ((context) {
+                             DeleteProductHandler({
+                              "user_id": "1",
+                              "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
+                            });
+                                                }),
+                                                backgroundColor: Color(0xFFFE4A49),
+                                                foregroundColor: Colors.white,
+                                                icon: Icons.delete,
+                                                label: 'Delete',
+                                              )
+                                            ],
+                                   ) ,
+                                                
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                  children: [
+                                                    Row(
+                                                     children: [
+                                                      Container(
+                                                    margin: const EdgeInsets.only(bottom: 2),
+                                                          width: width * 0.37,
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                           if(cartProvider?.CartData?.items?[index]?.variantid != null)
+                                                          Text("${cartProvider?.CartData?.items?[index]?.productName ?? ""}", maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12), fontWeight: FontWeight.w500,color: AppColors.blackcolor),),
+                                                       
+                                                        Container(
+                                                          width: width /2,
+                                                          child:  Text("${cartProvider?.CartData?.items?[index]?.name ?? ""}",
+                                                          maxLines: 2,
+                                                          overflow: TextOverflow.ellipsis,
+                                                           style:  TextStyle(fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(11), fontWeight: FontWeight.w500,color: AppColors.blackcolor.withOpacity(0.7)),)
+                                                        ,
+                                                        ),
+                                                        Text("Rs ${cartProvider?.CartData?.items?[index]?.price ?? ""}", style:  TextStyle(fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(11), fontWeight: FontWeight.w500,color: AppColors.blackcolor.withOpacity(0.7)),)
+                                                           ,
+                                                           
+                                                           ],
+                                                      ),
+                                                    ),
+                                                                   cartProvider?.CartData?.items?[index]?.status == 0
+                                             ?
+                                             Container(
+                                                width: width * 0.30,
+                                               alignment: Alignment.center,
+                                               child: Container(
+                                                padding: const EdgeInsets.all(5),
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  border: Border.all(color: Color(0XFFD3D3D3))
+                                                ),
+                                                child: Text("unavailable", style: TextStyle(color: Color(0XFFbdbdbd), fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12)),),
+                                               ),
+                                             )
+                                             :
+                                      
+                                                 ((cartProvider?.CartData?.items?[index]?.cartId?.toString() == cartProvider.loadingId) ? 
+                                                  Container(
+                                                    width: width * 0.33,
+                                                alignment: Alignment.center,
+                                                    child: Container(
+                                                          child: SizedBox(width: ScreenUtil().setSp(20), height: ScreenUtil().setSp(20), child: CircularProgressIndicator(
+                                                            strokeWidth: 1.0,
+                                                            color: AppColors.primaryColor,),)),
+                                                  )
+                                                 :   Container(
+                                                  width: width * 0.33,
+                                               
+                                                          child: Row(
+                                               mainAxisAlignment: MainAxisAlignment.center,
+                                                            children: [
+                                                              InkWell(
+                                                                onTap: (){
+                                                                 
+                                                                  if(cartProvider?.CartData?.items?[index]?.variantid != null){
+                                                        UpdateQuantityHandler({
+                                                          "cart_id": cartProvider?.CartData?.items?[index]?.cartId?.toString() ?? "",
+                                                          "type": "minus",
+                                                          "user_id": "1",
+                                                          "product_type": "variant",
+                                                        "latitude": widget.checkOut?.latitude?.toString(),
+                                                                    "longitude": widget.checkOut?.longitude?.toString()
+                                                                   });
+                                                      
+                                                       }else{
+                                              UpdateQuantityHandler({
+                                                          "cart_id": cartProvider?.CartData?.items?[index]?.cartId?.toString() ?? "",
+                                                          "type": "minus",
+                                                          "user_id": "1",
+                                                          "product_type": "",
+                                                        "latitude": widget.checkOut?.latitude?.toString(),
+                                                                    "longitude": widget.checkOut?.longitude?.toString()
+                                                        });
+                                                       }
+                                                                },
+                                                                child: Container(
+                                                                   decoration: BoxDecoration(
+                                                                    color: Colors.white,
+                                                                    borderRadius: BorderRadius.circular(4),
+                                                                    boxShadow: [
+                                                                      BoxShadow(
+                                                offset: Offset(0, 4),
+                                                blurRadius: 20,
+                                                color: const Color(0xFFB0CCE1).withOpacity(0.40),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                  padding: const EdgeInsets.all(5),
+                                                                  child: Icon(Icons.remove, size: ScreenUtil().setSp(22.0), color: AppColors.primaryColor,)),
+                                                                
+                                                              ),
+                                                              Container(
+                                                                
+                                                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                                                                child: Text("${cartProvider?.CartData?.items?[index]?.quantity ?? ""}", style: TextStyle(color: AppColors.primaryColor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.bold),),
+                                                              ),
+                                                                InkWell(
+                                                                    onTap: (){
+                                                                  
+                                                        if(cartProvider?.CartData?.items?[index]?.variantid != null){
+                                                        UpdateQuantityHandler({
+                                                          "cart_id": cartProvider?.CartData?.items?[index]?.cartId?.toString() ?? "",
+                                                          "type": "plus",
+                                                          "user_id": "1",
+                                                          "product_type": "variant",
+                                                        "latitude": widget.checkOut?.latitude?.toString(),
+                                                                    "longitude": widget.checkOut?.longitude?.toString()
+                                                        });
+                                                      
+                                                       }else{
+                                              UpdateQuantityHandler({
+                                                          "cart_id": cartProvider?.CartData?.items?[index]?.cartId?.toString() ?? "",
+                                                          "type": "plus",
+                                                          "user_id": "1",
+                                                          "product_type": "",
+                                                        "latitude": widget.checkOut?.latitude?.toString(),
+                                                                    "longitude": widget.checkOut?.longitude?.toString()
+                                                        });
+                                                       }                   },
+                                                                child: Container(
+                                                                    decoration: BoxDecoration(
+                                                                    color: Colors.white,
+                                                                    borderRadius: BorderRadius.circular(4),
+                                                                    boxShadow: [
+                                                                      BoxShadow(
+                                                offset: Offset(0, 4),
+                                                blurRadius: 20,
+                                                color: const Color(0xFFB0CCE1).withOpacity(0.40),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                  padding: const EdgeInsets.all(5),
+                                                                  child: Icon(Icons.add, size: ScreenUtil().setSp(20.0), color: AppColors.primaryColor,)),
+                                                                
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ))
+                                                     ],
+                                                    ),
+                              
+                                                                    cartProvider?.CartData?.items?[index]?.status == 0
+                                             ?  IconButton(onPressed: (){
+                                               DeleteProductHandler({
+                                                "user_id": "1",
+                                                "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
+                                              });  
+                                             }, icon: Icon(Icons.delete, color: AppColors.greycolor,size: ScreenUtil().setSp(20),))
+                                              : 
+                                                        Text("Rs ${cartProvider?.CartData?.items?[index]?.total ?? "" }", style:  TextStyle(fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12), fontWeight: FontWeight.w600,color: AppColors.blackcolor),)
+                                                  ],
+                                                ),
+                                ),
+                              ),
+                                          );
+                                 })),
+                                  ),
+                                ),
+                                        
+                                  Center(
+                                  child: AutoScrollTag(
+                                     key: ValueKey(2),
+                                                controller: controller,
+                                                index: 2,
+                                    child: Container(
+                                      margin:  EdgeInsets.only(top: ScreenUtil().setHeight(20)),
+                                      padding: const EdgeInsets.all(14.0),
+                                      width: width * 0.90,
+                                        decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          offset: Offset(0, 4),
+                                          blurRadius: 20,
+                                          color: const Color(0xFFB0CCE1).withOpacity(0.29),
+                                        ),
+                                      ],
+                                          
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text("Payment Method", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14), fontWeight: FontWeight.bold),)
+                                      ,ListView.builder(
+                                        shrinkWrap: true,
+                                        itemCount: _checkouttotal?.paymentMethod?.length ?? 0,
+                                        itemBuilder: (context, index) {
+                                        return Row(
+                                          children: [
+                                           Checkbox(
+                                                activeColor: AppColors.primaryColor,
+                                                hoverColor: AppColors.primaryColor,
+                                              
+                                                value: payment_id == _checkouttotal?.paymentMethod?[index]?.paymentId, 
+                                                onChanged: ((value) {
+                                                    payment_id = value! ? (_checkouttotal?.paymentMethod?[index]?.paymentId ?? 0) : 0;
+                                                      payment_method_error = false;
+                                                  setState(() {
+                                                  });
+                                               }))
+                                  
+                                               ,Text(_checkouttotal?.paymentMethod?[index]?.paymentName ?? '',
+                                               style: TextStyle(color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(13)),
+                                               )
+                                          ],
+                                        );
+                                      })
+                                  
+                                  
+                                  ,
+                                  BounceInLeft(
+                                    animate: payment_method_error,
+                                    child:   Column(
+                                    
+                                      children: [
+                                    
+                                             SizedBox(height: ScreenUtil().setHeight(10),),
+                                    
+                                            Text("Please..Select the Payment Method", style: TextStyle(color: Colors.red, fontFamily: FONT_FAMILY, fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(12)),),
+                                    
+                                      ],
+                                    
+                                    ),
+                                  )
+                                  
+                                  
+                                      ],
+                                    ),
+                                    ),
+                                  ),
+                                 ),   
+                                        
+                                   (_checkouttotal?.couponAmount != null && _checkouttotal?.couponCode != null)
+                                   ?
+                                   Center(
+                                                
+                                      child: Container(
+                                          margin:  EdgeInsets.only(top: ScreenUtil().setHeight(20)),
+                                          padding: const EdgeInsets.all(14.0),
+                                          width: width * 0.90,
+                                            decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(8),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              offset: Offset(0, 4),
+                                              blurRadius: 20,
+                                              color: const Color(0xFFB0CCE1).withOpacity(0.29),
+                                            ),
+                                          ],
+                                              
+                                        ),
+                                        child:    Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                     children: [
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                         Row(
+                                          children: [
+                                             Text("'${_checkouttotal?.couponCode?.toUpperCase()}'",
+                                          style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14), fontWeight: FontWeight.w600),
+                                          ),
+                                            SizedBox(width: 5),
+                                           Text("Applied",
+                                          style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12.5), fontWeight: FontWeight.w600),
+                                          )
+                                          ]
+                                         ),
+                                         SizedBox(height: 5),
+                                         Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                             Text("  Rs ${_checkouttotal?.couponAmount}",
+                                          style: TextStyle(color: AppColors.primaryColor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12), fontWeight: FontWeight.w600),
+                                          ),
+                                          SizedBox(width: 5),
+                                            Text("Coupon Savings",
+                                          style: TextStyle(color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12)),
+                                          )
+                                          ],
+                                         )
+                                        ]
+                                      ),
+                                              
+                                       InkWell(
+                                              onTap: (){
+                                                CheckOutHandler();
+                                              },
+                                              child: Container(
+                                                margin: const EdgeInsets.only(left: 10),
+                                                child: Text("Remove", style: TextStyle(color: AppColors.primaryColor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12), fontWeight: FontWeight.w600))),
+                                            )
+                                     ])
+                                      ))
+                                    
+                                   : 
+                                                
+                                     Center(
+                                                
+                                      child: Container(
+                                          margin:  EdgeInsets.only(top: ScreenUtil().setHeight(20)),
+                                          padding: const EdgeInsets.all(14.0),
+                                          width: width * 0.90,
+                                            decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(8),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              offset: Offset(0, 4),
+                                              blurRadius: 20,
+                                              color: const Color(0xFFB0CCE1).withOpacity(0.29),
+                                            ),
+                                          ],
+                                              
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                                   Text("Coupon", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14), fontWeight: FontWeight.bold),)
+                                   
+                                   , 
+                                   SizedBox(height: 10),
+                                   
+                                   Row(
+                                     children: [
+                                       Flexible(
+                                         child: TextFormField(
+                                           validator: ((value){
+                              if(value == "") return "Coupon Code is required";
+                              return null;
+                            }),
+                                            
+                                                  controller: couponController,
+                                          
+                                                 style: TextStyle(fontSize: ScreenUtil().setSp(12.0), fontFamily: FONT_FAMILY, fontWeight: FontWeight.normal, color: AppColors.blackcolor),
+                                                 cursorColor: AppColors.greycolor,
+                                               
+                                                 decoration:  InputDecoration(
+                                                               labelText: 'Enter Coupon',
+                                                               contentPadding: EdgeInsets.all(8),
+                                                               border: OutlineInputBorder(
+                                                               )
+                                                               ,
+                                         focusedBorder: OutlineInputBorder(
+                                           borderRadius: BorderRadius.all(Radius.circular(4)),
+                                           borderSide: BorderSide(width: 1,color: AppColors.lightgreycolor),
+                                         ),
+                                         enabledBorder: OutlineInputBorder(
+                                           borderRadius: BorderRadius.all(Radius.circular(4)),
+                                           borderSide: BorderSide(width: 1,color: AppColors.lightgreycolor),
+                                         ),
+                                                               labelStyle: TextStyle(fontSize: ScreenUtil().setSp(12.0), fontFamily: FONT_FAMILY, fontWeight: FontWeight.normal, color: AppColors.greycolor)
+                                                // TODO: add errorHint
+                                                ),
+                                              ),
+                                       ),
+                                            InkWell(
+                                              onTap: (){
+                                                print('hhh');
+                                                 if (!formGlobalKey.currentState!.validate()) {
+                              return;
+                            }
+                                                ApplyCouponHandler();
+                                              },
+                                              child: Container(
+                                                margin: const EdgeInsets.only(left: 10),
+                                                child: Text("Apply", style: TextStyle(color: AppColors.primaryColor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(12), fontWeight: FontWeight.w600))),
+                                            )
+                                     ],
+                                   )
+                                        ]
+                                        
+                                        
+                                        
+                                        ),
+                                      )
+                                     ),     
+                                 Center(
+                                  child: Container(
+                                    margin:  EdgeInsets.only(top: ScreenUtil().setHeight(20)),
+                                    padding: const EdgeInsets.all(14.0),
+                                    width: width * 0.90,
+                                      decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        offset: Offset(0, 4),
+                                        blurRadius: 20,
+                                        color: const Color(0xFFB0CCE1).withOpacity(0.29),
+                                      ),
+                                    ],
+                                        
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text("Sub Total", style: TextStyle(color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.w500),),
+                                          Text("Rs ${_checkouttotal?.subTotal ?? ''}", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.bold),)
+                                        
+                                        ],
+                                      ),
+                                      
+                                      SizedBox(height: ScreenUtil().setSp(20.0),),
+                                       Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text("Delivery Charges", style: TextStyle(color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.w500),),
+                                              SizedBox(height: 4,),
+                                            //  if(_checkouttotal?.kms != null)
+                                               Text("${_checkouttotal?.kms ?? ''} kms", style: TextStyle(color: AppColors.lightgreycolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(11.0), fontWeight: FontWeight.normal),),
+                                           
+                                            ],
+                                          ),
+                                          Text("Rs ${_checkouttotal?.deliveryCharges ?? ''}", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.bold),)
+                                        
+                                        ],
+                                      ),
+                                       if(_checkouttotal?.couponAmount != null)
+                                     Column(
+                                      children: [
+                                         SizedBox(height: ScreenUtil().setSp(20.0),),
+                                       Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text("Coupon", style: TextStyle(color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.w500),),
+                                              SizedBox(height: 4,),
+                                            //  if(_checkouttotal?.kms != null)
+                                               Text("${_checkouttotal?.couponCode ?? ''} ", style: TextStyle(color: AppColors.lightgreycolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(11.0), fontWeight: FontWeight.normal),),
+                                           
+                                            ],
+                                          ),
+                                          Text("Rs ${_checkouttotal?.couponAmount ?? ''}", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.bold),)
+                                        
+                                        ],
+                                      ),
+                                      ]
+                                     ),
+                                      SizedBox(height: ScreenUtil().setSp(20.0),),
+                                       Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text("Grand Total", style: TextStyle(color: AppColors.pricecolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.w500),),
+                                          Text("Rs ${_checkouttotal?.total ?? ''}", style: TextStyle(color: AppColors.blackcolor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.bold),)
+                                        
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  ),
+                                 )
+                                  
+                                ],
+                            ),
+                              ),),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              )
-            ),
+                )
+              ),
+         ),
           ),
 
       if(order_loading)

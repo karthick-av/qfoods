@@ -34,7 +34,6 @@ int per_page = 10;
 bool loading = false;
 bool footer_loading = false;
 bool header_loading = false;
-var opacityValue = 0.0;
 
 List<GroceryOrderModel> orders = [];
 
@@ -55,16 +54,7 @@ List<GroceryOrderModel> orders = [];
        }
     }
 
-    double val = double.parse((scrollController.offset.toInt() / ScreenUtil().setHeight(60.0).toInt()).toStringAsFixed(1));
-    if(val <= 1.0){
-      print("trigger ${val}" );
-    setState(() {
-       
-       opacityValue = val;
-     });
    
-    }
-  
     });
     
     super.initState();

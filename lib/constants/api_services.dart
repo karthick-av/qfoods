@@ -68,6 +68,7 @@ class ApiServices{
     
     
     static const apply_coupon = "${BASEURL}user/coupon/apply";
+    static const apply_grocery_coupon = "${BASEURL}user/coupon/grocery/apply";
     
     static const update_fcmtoken = "${BASEURL}user/login/updatefcmtoken";
      }
