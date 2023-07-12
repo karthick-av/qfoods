@@ -41,12 +41,7 @@ List<OrderModel> orders = [];
     getOrdersHandler();
     scrollController.addListener(() { 
       print(scrollController.offset);
-      //listener 
-    
-      // if(scrollController.offset.toInt() > ScreenUtil().setHeight(32.0).toInt()){
-        
-        
-      // }
+      
         if(scrollController.position.maxScrollExtent == scrollController.offset){
        if(!ApiCallDone){
         BottomGetOrdersHandler();

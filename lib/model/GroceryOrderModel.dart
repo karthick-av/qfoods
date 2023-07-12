@@ -7,6 +7,8 @@ class GroceryOrderModel {
   int? status;
   int? isCancelled;
   int? isDelivered;
+  int? isReviewed;
+  int? isDeliveryPersonRating;
   int? deliveryPersonId;
   String? orderCreated;
   Address? address;
@@ -23,6 +25,8 @@ class GroceryOrderModel {
       this.deliveryCharges,
       this.grandTotal,
       this.status,
+      this.isReviewed,
+      this.isDeliveryPersonRating,
       this.isCancelled,
       this.isDelivered,
       this.deliveryPersonId,
@@ -43,6 +47,8 @@ class GroceryOrderModel {
     status = json['status'];
     isCancelled = json['isCancelled'];
     isDelivered = json['isDelivered'];
+    isReviewed = json['isReviewed'];
+    isDeliveryPersonRating = json['isDeliveryPersonRating'];
     deliveryPersonId = json['delivery_person_id'];
     orderCreated = json['order_created'];
     address =
@@ -78,6 +84,8 @@ class GroceryOrderModel {
     data['delivery_charges'] = this.deliveryCharges;
     data['grand_total'] = this.grandTotal;
     data['status'] = this.status;
+    data['isReviewed'] = this.isReviewed;
+    data['isDeliveryPersonRating'] = this.isDeliveryPersonRating;
     data['isCancelled'] = this.isCancelled;
     data['isDelivered'] = this.isDelivered;
     data['delivery_person_id'] = this.deliveryPersonId;

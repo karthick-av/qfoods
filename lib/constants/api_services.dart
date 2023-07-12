@@ -44,6 +44,11 @@ class ApiServices{
   
   static const grcoery_check_out ="${BASEURL}user/order/grocery/checkout/";
   static const create_order ="${BASEURL}user/order/createorder/";
+  static const apply_review ="${BASEURL}user/order/apply_review/";
+  static const apply_grocery_review ="${BASEURL}user/order/apply_grocery_review/";
+  
+  static const apply_delivery_person_rating ="${BASEURL}user/order/apply_delivery_person_rating/";
+  static const apply_grocery_delivery_person_rating ="${BASEURL}user/order/apply_grocery_delivery_person_rating/";
    static const grocery_create_order ="${BASEURL}user/order/grocery/createorder/";
  
 
