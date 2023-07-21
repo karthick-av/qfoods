@@ -9,6 +9,7 @@ import 'package:qfoods/constants/font_family.dart';
 import 'package:qfoods/model/CartModel.dart';
 import 'package:qfoods/model/SelectedVariantModel.dart';
 import 'package:qfoods/widgets/CartDishVariantBottomSheet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CartCard extends StatelessWidget {
   final int index;
@@ -42,9 +43,12 @@ class CartCard extends StatelessWidget {
 children:  [
       // A SlidableAction can have an icon and/or a label.
       SlidableAction(
-        onPressed: ((context) {
+        onPressed: ((context) async{
+           final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
            cartProvider.deleteProduct({
-            "user_id": 1,
+            "user_id": user_id?.toString(),
             "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
           });
         }),
@@ -61,9 +65,12 @@ children:  [
 children:  [
       // A SlidableAction can have an icon and/or a label.
       SlidableAction(
-         onPressed: ((context) {
+         onPressed: ((context) async{
+           final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
            cartProvider.deleteProduct({
-            "user_id": 1,
+            "user_id": user_id?.toString(),
             "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
           });
         }),
@@ -231,9 +238,12 @@ children:  [
                                 ],
                                ),
                                cartProvider?.CartData?.items?[index]?.status == 0
-                               ?  IconButton(onPressed: (){
+                               ?  IconButton(onPressed: () async{
+                                 final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                                  cartProvider.deleteProduct({
-            "user_id": 1,
+            "user_id": user_id?.toString(),
             "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
           });  
                                }, icon: Icon(Icons.delete, color: AppColors.greycolor,size: ScreenUtil().setSp(20),))

@@ -27,6 +27,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class CheckOutScreen extends StatefulWidget {
@@ -78,6 +79,10 @@ void dispose(){
 
 
 Future<void> CreateOrderHandler() async{
+  
+ final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
 if(payment_id == 0){
     await controller.scrollToIndex(1,
         preferPosition: AutoScrollPosition.begin);
@@ -97,8 +102,10 @@ payment_method_error = false;
     order_loading =true;
   });
 try{
+
   final data = {
-"user_id": "1", "latitude": widget?.checkOut?.latitude?.toString() ?? "0",
+"user_id": user_id?.toString(), 
+"latitude": widget?.checkOut?.latitude?.toString() ?? "0",
  "longitude": widget?.checkOut?.longitude?.toString() ?? "", "address1": widget?.checkOut?.address1?.toString() ?? "",
   "address2": widget?.checkOut?.address2?.toString() ?? "","landmark": widget?.checkOut?.landMark?.toString() ?? "",
    "alternate_phone_number": widget?.checkOut?.alternate_phone_number?.toString() ?? "", 
@@ -244,13 +251,16 @@ catch(e){
 
 
 Future<void> CheckOutHandler() async{
+   final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
   setState(() {
     loading = true;
   });
 try{
   
 dynamic jsonMap = {
-      "user_id": "1",
+      "user_id": user_id?.toString(),
       "latitude": widget.checkOut?.latitude?.toString(),
       "longitude": widget.checkOut?.longitude?.toString()
     };
@@ -296,6 +306,9 @@ dynamic jsonMap = {
 
 
 Future<void> ApplyCouponHandler() async{
+   final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
   try{
     context.loaderOverlay.show();
 
@@ -306,7 +319,7 @@ Future<void> ApplyCouponHandler() async{
 
 
     dynamic data = {
-      "user_id": "1",
+      "user_id": user_id?.toString(),
       "latitude": widget.checkOut?.latitude?.toString(),
       "longitude": widget.checkOut?.longitude?.toString(),
       "code": couponController.value.text
@@ -565,9 +578,12 @@ Widget PlaceOrder(){
                                   children:  [
                                     // A SlidableAction can have an icon and/or a label.
                                     SlidableAction(
-                                      onPressed: ((context) {
+                                      onPressed: ((context) async {
+                                         final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                                          DeleteProductHandler({
-                                          "user_id": "1",
+                                          "user_id": user_id?.toString(),
                                           "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
                                         });
                                       }),
@@ -584,9 +600,12 @@ Widget PlaceOrder(){
                                   children:  [
                                     // A SlidableAction can have an icon and/or a label.
                                     SlidableAction(
-                                       onPressed: ((context) {
+                                       onPressed: ((context) async{
+                                         final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                                          DeleteProductHandler({
-                                          "user_id": "1",
+                                          "user_id": user_id?.toString(),
                                           "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
                                         });
                                       }),
@@ -697,10 +716,13 @@ Widget PlaceOrder(){
                                                   mainAxisAlignment: MainAxisAlignment.center,
                                                             children: [
                                                               InkWell(
-                                                                onTap: (){
+                                                                onTap: () async{
+                                                                   final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                                                                   UpdateQuantityHandler({
                                                                     "cart_id": cartProvider?.CartData?.items?[index]?.cartId?.toString() ?? '',
-                                                                    "user_id": "1",
+                                                                    "user_id": user_id?.toString(),
                                                                     "type": "minus",
                                                                     "latitude": widget.checkOut?.latitude?.toString(),
                                                                     "longitude": widget.checkOut?.longitude?.toString(),
@@ -730,10 +752,13 @@ Widget PlaceOrder(){
                                                                 child: Text("${cartProvider?.CartData?.items?[index]?.quantity ?? ""}", style: TextStyle(color: AppColors.primaryColor, fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(14.0), fontWeight: FontWeight.bold),),
                                                               ),
                                                                 InkWell(
-                                                                    onTap: (){
+                                                                    onTap: () async{
+                                                                       final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                                                                    UpdateQuantityHandler({
                                                                     "cart_id": cartProvider?.CartData?.items?[index]?.cartId?.toString() ?? '',
-                                                                    "user_id": "1",
+                                                                    "user_id":user_id?.toString(),
                                                                     "type": "plus",
                                                                     "latitude": widget.checkOut?.latitude?.toString(),
                                                                     "longitude": widget.checkOut?.longitude?.toString(),
@@ -764,9 +789,12 @@ Widget PlaceOrder(){
                                                       ],
                                                     ),
                                                        cartProvider?.CartData?.items?[index]?.status == 0
-                                         ?  IconButton(onPressed: (){
+                                         ?  IconButton(onPressed: () async{
+                                           final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                                            DeleteProductHandler({
-                                            "user_id": "1",
+                                            "user_id": user_id?.toString(),
                                             "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
                                           });  
                                          }, icon: Icon(Icons.delete, color: AppColors.greycolor,size: ScreenUtil().setSp(20),))

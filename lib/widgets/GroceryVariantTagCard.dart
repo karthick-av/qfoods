@@ -5,6 +5,7 @@ import 'package:qfoods/Provider/GroceryCartProvider.dart';
 import 'package:qfoods/constants/colors.dart';
 import 'package:qfoods/constants/font_family.dart';
 import 'package:qfoods/model/GroceryHomeTagsModel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class GroceryVariantTagCard extends StatelessWidget {
@@ -115,10 +116,12 @@ class GroceryVariantTagCard extends StatelessWidget {
                                   ),
                                 )
                                : GestureDetector(
-                                onTap: (){
-                                  
+                                onTap: () async{
+                                   final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                                 Provider.of<GroceryCartProvider>(context, listen: false).addCart({
-                                   "user_id": 1,
+                                   "user_id": user_id?.toString(),
     "product_id": products!.groceryId,
     "variant_id": variantsProducts!.id
                                  });

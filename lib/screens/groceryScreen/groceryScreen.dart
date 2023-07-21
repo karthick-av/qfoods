@@ -91,14 +91,17 @@ class _GroceryScreenState extends State<GroceryScreen> {
                           
                       ),
                       actions: [
-                        IconButton(
-                          color: AppColors.primaryColor,
-                          icon:  Icon(Icons.favorite_border, size:  ScreenUtil().setSp(14.0),),
-                          
-                          onPressed: () {
-                          },
-                          
-                        ),
+                       IconButton(
+                   color: AppColors.primaryColor,
+                   icon:  Icon(Icons.local_grocery_store, size:  ScreenUtil().setSp(25.0),),
+                   
+                   onPressed: () {
+                      Navigator.push(
+       context,
+       MaterialPageRoute(builder: (context) => GroceryCartScreen()));
+                   },
+                   
+                 ),
                       ],
                       bottom: PreferredSize(
                         preferredSize: Size.fromHeight(ScreenUtil().setHeight(60.0)),

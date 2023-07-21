@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:qfoods/constants/colors.dart';
 import 'package:qfoods/constants/font_family.dart';
+import 'package:qfoods/screens/LoginScreen/LoginScreen.dart';
 import 'package:qfoods/screens/MyOrdersScreen/MyGroceryOrdersScreen.dart';
 import 'package:qfoods/screens/MyOrdersScreen/MyOrdersScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyAccountScreen extends StatefulWidget {
   const MyAccountScreen({super.key});
@@ -19,6 +21,56 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
      Size size = MediaQuery.of(context).size;
    
    double width = size.width;
+
+LogoutDialog(BuildContext context){
+
+  // set up the buttons
+  Widget cancelButton = TextButton(
+    child: Text("No",  style: TextStyle(color: AppColors.primaryColor, fontWeight: FontWeight.w500,fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(15))),
+    onPressed:  () {
+     Navigator.of(context, rootNavigator: true).pop(context);
+    },
+  );
+  Widget continueButton = TextButton(
+    
+    child: Text("Yes", style: TextStyle(color: AppColors.primaryColor, fontWeight: FontWeight.w500,fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(15)),),
+    onPressed:  () async{
+ final prefs = await SharedPreferences.getInstance();
+                     prefs.remove("isLogged");
+                     prefs.remove("qfoods_user_id");
+       Navigator.of(context, rootNavigator: true)
+                              .pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return const LoginScreen();
+                              },
+                            ),
+                            (_) => false,
+                          );
+                    
+    },
+  );
+
+  // set up the AlertDialog
+  AlertDialog alert = AlertDialog(
+    title: Text("Logout"),
+    content: Text("Are you sure to logout?"),
+    actions: [
+      cancelButton,
+      continueButton,
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
+
+
     return Scaffold(
       backgroundColor: AppColors.whitecolor,
       body: SafeArea(
@@ -113,6 +165,31 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                         )
                        ],
                     ),
+                  ),
+                ),
+
+                   SizedBox(height: 10,),
+                InkWell(
+                  onTap: (){
+                    LogoutDialog(context);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
+                    width: width * 0.95,
+                    decoration: BoxDecoration(
+                             color: Colors.white,
+                             borderRadius: BorderRadius.circular(10),
+                             boxShadow: [
+                               BoxShadow(
+                                 offset: Offset(0, 4),
+                                 blurRadius: 20,
+                                 color: const Color(0xFFB0CCE1).withOpacity(0.29),
+                               ),
+                             ],
+                    ),
+                    child:  Text(
+                            "Logout",maxLines: 2,style: TextStyle(fontFamily: FONT_FAMILY, overflow: TextOverflow.ellipsis,fontWeight: FontWeight.bold, color: AppColors.blackcolor, fontSize: ScreenUtil().setSp(14.0)),
+                             ),
                   ),
                 )
                 ],

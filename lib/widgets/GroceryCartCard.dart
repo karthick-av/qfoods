@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:qfoods/Provider/GroceryCartProvider.dart';
 import 'package:qfoods/constants/colors.dart';
 import 'package:qfoods/constants/font_family.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GroceryCartCard extends StatelessWidget {
   final int index;
@@ -38,9 +39,12 @@ class GroceryCartCard extends StatelessWidget {
 children:  [
       // A SlidableAction can have an icon and/or a label.
       SlidableAction(
-        onPressed: ((context) {
+        onPressed: ((context) async{
+           final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
            cartProvider.deleteProduct({
-            "user_id": 1,
+            "user_id": user_id?.toString(),
             "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
           });
         }),
@@ -57,9 +61,12 @@ children:  [
 children:  [
       // A SlidableAction can have an icon and/or a label.
       SlidableAction(
-         onPressed: ((context) {
+         onPressed: ((context) async{
+           final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
            cartProvider.deleteProduct({
-            "user_id": 1,
+            "user_id": user_id?.toString(),
             "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
           });
         }),
@@ -189,9 +196,12 @@ children:  [
                                     ],
                                   ),
                                    cartProvider?.CartData?.items?[index]?.status == 0
-                               ?  IconButton(onPressed: (){
+                               ?  IconButton(onPressed: () async{
+                                 final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                                  cartProvider.deleteProduct({
-            "user_id": 1,
+            "user_id": user_id?.toString(),
             "cart_id": [cartProvider?.CartData?.items?[index]?.cartId]
           });
                                }, icon: Icon(Icons.delete, color: AppColors.greycolor,size: ScreenUtil().setSp(20),))

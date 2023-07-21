@@ -12,9 +12,10 @@ import 'package:qfoods/Provider/GroceryHomeProvider.dart';
 import 'package:qfoods/Provider/HomeProvider.dart';
 import 'package:qfoods/Provider/SelectedVariantProvider.dart';
 import 'package:qfoods/helpers/Notification_services.dart';
-import 'package:qfoods/screens/MyOrdersScreen/MyOrdersScreen.dart';
-import 'package:qfoods/screens/ViewOrderScreen/TimeLine.dart';
-import 'package:qfoods/screens/ViewOrderScreen/ViewOrderScreen.dart';
+import 'package:qfoods/screens/LoginScreen/LoginScreen.dart';
+import 'package:qfoods/screens/SignUpScreen/SignUpScreen.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -32,27 +33,11 @@ await Firebase.initializeApp();
  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 NotificationService.initalize();
 
-
+final SharedPreferences prefs = await SharedPreferences.getInstance();
+  var isLoggedIn = ((prefs.getBool('isLogged') == null) ? false : prefs.getBool('isLogged')) ?? false;
   runApp(GetMaterialApp(
     debugShowCheckedModeBanner: false,
-    home: MyApp()));
-    getToken();
-}
-
-Future<void> getToken() async{
-  await FirebaseMessaging.instance.getToken().then((value) => {
-   print(value)
-  });
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return  MultiProvider(
+    home:  MultiProvider(
       providers: [
         ChangeNotifierProvider(create: ((context) => CartProvider())),
          ChangeNotifierProvider(create: ((context) => GroceryCartProvider())),
@@ -69,10 +54,12 @@ class MyApp extends StatelessWidget {
         minTextAdapt: true,
         splitScreenMode: true,
             builder: ((context, child) {
-              return SafeArea(child: BottomNavigation());
+              return SafeArea(child: isLoggedIn ? BottomNavigation() : LoginScreen());
             }),
            )
       ),
-    );
-  }
+    )));
+   
 }
+
+

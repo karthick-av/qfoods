@@ -6,6 +6,7 @@ import 'package:qfoods/constants/colors.dart';
 import 'package:qfoods/constants/font_family.dart';
 import 'package:qfoods/model/RestaurantAndDishesModel.dart';
 import 'package:qfoods/widgets/DishVariantBottomSheet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DishCard extends StatelessWidget {
   final SearchResults? dish;
@@ -130,14 +131,17 @@ print(CartProduct?.name);
                                 ? unAvailable()
                                 :
                                  InkWell(
-                                  onTap: (){
+                                  onTap: () async{
                                      print("object");
                                      print(dish?.variant == "true" && (dish?.dishVariants?.length ?? 0) > 0);
                                     if(dish?.variant == "true" && (dish?.dishVariants?.length ?? 0) > 0){
 DishVariantBottomSheet().dishVariantModal(dish, rstatus,context);
                                     }else{
+                                       final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                                          Provider.of<CartProvider>(context, listen: false).addCart({
-                                   "user_id": 1,
+                                   "user_id": user_id?.toString(),
                                    "product_id": dish?.dishId
                                  });
                                     }
@@ -184,14 +188,17 @@ DishVariantBottomSheet().dishVariantModal(dish, rstatus,context);
                                     : 
                                    
                                     InkWell(
-                                       onTap: (){
+                                       onTap: () async{
                                         print("object");
                                       print(dish?.variant == "true");
                                    if(dish?.variant == "true" && (dish?.dishVariants?.length ?? 0) > 0){
 DishVariantBottomSheet().dishVariantModal(dish,rstatus,context);
                                     }else{
+                                       final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                                          Provider.of<CartProvider>(context, listen: false).addCart({
-                                   "user_id": 1,
+                                   "user_id": user_id?.toString(),
                                    "product_id": dish?.dishId
                                  });
                                     }

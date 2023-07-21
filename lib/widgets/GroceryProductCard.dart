@@ -6,6 +6,7 @@ import 'package:qfoods/constants/colors.dart';
 import 'package:qfoods/constants/font_family.dart';
 import 'package:qfoods/model/GrocerySearchModel.dart';
 import 'package:qfoods/widgets/GroceryVariantBottomSheet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 
@@ -138,9 +139,12 @@ class GroceryProductCard extends StatelessWidget {
                                :
                     
                InkWell(
-                onTap: (){
+                onTap: () async{
+                   final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                     Provider.of<GroceryCartProvider>(context, listen: false).addCart({
-                                   "user_id": 1,
+                                   "user_id": user_id?.toString(),
                                    "product_id": grocerysearchData?.groceryId
                                  });
                 },

@@ -11,6 +11,7 @@ import 'package:qfoods/model/GroceryOrderModel.dart';
 import 'package:qfoods/screens/ViewOrderScreen/TimeLine.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -595,6 +596,9 @@ Navigator.pop(context);
   bool loading = false;
 
   Future<void> ApplyReviewHandler(BuildContext cxt) async{
+     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
   try{
     List<dynamic> data = [];
     DishesReview?.forEach((v){
@@ -603,7 +607,7 @@ Navigator.pop(context);
       "item_id": v["item_id"]?.toString(),
       "rating": v["rating"]?.toString(),
       "review": v["review"]?.toString(),
-      "user_id": "1",
+      "user_id": user_id?.toString(),
       "order_id": order?.orderId?.toString()
      });
     });
@@ -835,6 +839,9 @@ CustomSnackBar().ErrorSnackBar();
 
   Future<void> ApplyReviewHandler(StateSetter myState) async{
   try{
+     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
     
     loading = true;
     myState((){});
@@ -845,7 +852,7 @@ CustomSnackBar().ErrorSnackBar();
 
 
     dynamic data = {
-      "user_id": "1",
+      "user_id": user_id?.toString(),
       "order_id": widget.orderDetail?.orderId?.toString(),
       "rating": rating?.toString(),
       "review": review?.toString(),

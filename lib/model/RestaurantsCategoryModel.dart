@@ -6,6 +6,7 @@ class RestaurantsCategoryModel {
   String? image;
   String? address;
   int? status;
+  String? rating;
 
   RestaurantsCategoryModel(
       {this.restaurantId,
@@ -14,7 +15,8 @@ class RestaurantsCategoryModel {
       this.description,
       this.image,
       this.address,
-      this.status
+      this.status,
+      this.rating
       });
 
   RestaurantsCategoryModel.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,7 @@ class RestaurantsCategoryModel {
     image = json['image'];
     address = json['address'];
     status = json['status'];
+    rating = json['rating'];
   }
 
   Map<String, dynamic> toJson() {
@@ -36,6 +39,7 @@ class RestaurantsCategoryModel {
     data['image'] = this.image;
     data['address'] = this.address;
     data['status'] = this.status;
+    data['rating'] = this.rating;
     return data;
   }
 }

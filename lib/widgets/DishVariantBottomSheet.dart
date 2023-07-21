@@ -9,6 +9,7 @@ import 'package:qfoods/constants/font_family.dart';
 import 'package:qfoods/model/CartModel.dart';
 import 'package:qfoods/model/RestaurantAndDishesModel.dart';
 import 'package:qfoods/widgets/DishVariantCard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DishVariantBottomSheet {
   Future<void> dishVariantModal(
@@ -132,9 +133,12 @@ class DishVariantBottomSheet {
                               Text("Rs ${SelectedVariant?.total ?? ''}", style: TextStyle(fontFamily: FONT_FAMILY, fontSize: ScreenUtil().setSp(13.0), fontWeight: FontWeight.bold, color: AppColors.blackcolor),)
                             ,
                             InkWell(
-                              onTap: (){
+                              onTap: () async{
+                                 final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                                 Provider.of<CartProvider>(context, listen: false).addCart({
-                                   "user_id": 1,
+                                   "user_id": user_id?.toString(),
                                    "product_id": dish?.dishId,
                                    "variants": SelectedVariant.SelectedVariants?.map((e) => e?.variantItemId)?.toList()
                                  });

@@ -23,7 +23,14 @@ options: [
    Options(attribute_id: "5",attributeName: "Rs 100 - Rs 200", maxPrice: "200", minPrice: "100"),
   Options(attribute_id: "6",attributeName: "Less Than 100", type: "less", value: "100"),
    Options(attribute_id: "7",attributeName: "Greater Than 300", type: "more", value: "300")
-])
+]),
 
+FilterModel(title: "Rating", selected: "", type: "radio",
+filter_type: "rating", 
+options: [
+   Options(attribute_id: "8",attributeName: "Rating : (High to Low)", type: "rating", value: "desc"),
+   Options(attribute_id: "9",attributeName: "Rating : (Low to High)", type: "rating", value: "asc"),
+ 
+])
 
 ];

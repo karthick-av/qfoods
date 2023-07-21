@@ -22,6 +22,7 @@ import 'package:qfoods/screens/Widget/CategoryWidget.dart';
 import 'package:qfoods/screens/Widget/TopRestaurants.dart';
 import 'package:qfoods/screens/Widget/topdishesWidget.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 
@@ -55,8 +56,11 @@ Future<void> UpdateFcmTokenHandler() async{
   try{
  final uri = Uri.parse(ApiServices.update_fcmtoken);
  String? token = await FirebaseMessaging.instance.getToken();
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
     final data = {
-      "user_id": "1",
+      "user_id": user_id?.toString(),
       "fcm_token": token
     };
 
@@ -80,7 +84,7 @@ Future<void> UpdateFcmTokenHandler() async{
      final cartProvider =  Provider.of<CartProvider>(context, listen: true);
    
    return Scaffold(
- 
+        
     backgroundColor: AppColors.whitecolor,
       body: SafeArea(
           child: Stack(
@@ -124,9 +128,13 @@ Future<void> UpdateFcmTokenHandler() async{
                actions: [
                  IconButton(
                    color: AppColors.primaryColor,
-                   icon:  Icon(Icons.favorite_border, size:  ScreenUtil().setSp(14.0),),
+                   icon:  Icon(Icons.local_grocery_store, size:  ScreenUtil().setSp(25.0),),
                    
-                   onPressed: () {},
+                   onPressed: () {
+                      Navigator.push(
+       context,
+       MaterialPageRoute(builder: (context) => CartScreen()));
+                   },
                    
                  ),
                ],

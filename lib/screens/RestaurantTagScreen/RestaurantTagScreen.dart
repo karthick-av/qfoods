@@ -142,6 +142,12 @@ final opt = filter[i]?.options;
           Url += "&price_type=sort&sort_price=${option?.value}&sort_type=${option?.type}";
        }
  }
+if(filter[i]?.filter_type == "rating"){
+      final option = opt?.firstWhere((ele) => ele.attribute_id?.toString() == filter[i]?.selected);
+     if(option?.value != null){
+      Url += "&rating=true&ratingBy=${option?.value}";
+     }
+ }
 
 }
 }

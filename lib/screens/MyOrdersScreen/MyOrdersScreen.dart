@@ -12,6 +12,7 @@ import 'package:qfoods/model/OrderModel.dart';
 import 'package:http/http.dart' as http;
 import 'package:qfoods/screens/ViewOrderScreen/ViewOrderScreen.dart';
 import 'package:qfoods/widgets/RestaurantCardLoading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class MyOrdersScreen extends StatefulWidget {
@@ -55,8 +56,11 @@ List<OrderModel> orders = [];
     super.initState();
   }
 
-String URL(){
-  String userid = "1";
+Future<String> URL() async{
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+    if(user_id == null) return "";
+    String userid =user_id!.toString();
   
       String url = "${ApiServices.get_orders}${userid}?page=${current_page}&per_page=${per_page}";
 return url;
@@ -81,7 +85,7 @@ Future<void> getOrdersHandler()async {
   });
 try{
   print(URL());
-    var response = await http.get(Uri.parse(URL()));
+    var response = await http.get(Uri.parse(await URL()));
      setState(() {
     loading = false;
   });
@@ -120,7 +124,7 @@ Future<void> BottomGetOrdersHandler()async {
   });
 try{
   
-    var response = await http.get(Uri.parse(URL()));
+    var response = await http.get(Uri.parse(await URL()));
     
     if(response.statusCode == 200){
        var response_body = json.decode(response.body);

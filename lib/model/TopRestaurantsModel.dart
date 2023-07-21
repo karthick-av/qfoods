@@ -8,6 +8,7 @@ class TopRestaurantsModel {
   String? image;
   String? address;
   String? phoneNumber;
+  String? rating;
   int? status;
 
   TopRestaurantsModel(
@@ -16,6 +17,7 @@ class TopRestaurantsModel {
       this.visible,
       this.restaurantName,
       this.shortDescription,
+      this.rating,
       this.description,
       this.image,
       this.address,
@@ -33,6 +35,7 @@ class TopRestaurantsModel {
     address = json['address'];
     phoneNumber = json['phone_number'];
     status = json['status'];
+    rating = json['rating'];
   }
 
   Map<String, dynamic> toJson() {
@@ -47,6 +50,7 @@ class TopRestaurantsModel {
     data['address'] = this.address;
     data['phone_number'] = this.phoneNumber;
     data['status'] = this.status;
+    data['rating'] = this.rating;
     return data;
   }
 }

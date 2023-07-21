@@ -14,6 +14,8 @@ import 'package:qfoods/model/GroeryVariantItemModel.dart';
 
 import 'dart:developer';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class GroceryVariantCard extends StatelessWidget {
   final GrocerySearchModel grocerySearchModelData;
   // ignore: non_constant_identifier_names
@@ -111,10 +113,12 @@ class GroceryVariantCard extends StatelessWidget {
                                 )
 
                               : InkWell(
-                                onTap: (){
-                                  
+                                onTap: () async{
+                                   final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+  if(user_id == null) return;
                                 Provider.of<GroceryCartProvider>(context, listen: false).addCart({
-                                   "user_id": 1,
+                                   "user_id": user_id?.toString(),
     "product_id": grocerySearchModelData.groceryId,
     "variant_id": VariantItem.id
                                  });

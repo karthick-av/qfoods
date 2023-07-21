@@ -23,7 +23,6 @@ class _BottomNavigationState extends State<BottomNavigation> {
 List pages = [
  HomeScreen(),
  GroceryScreen(),
- CartScreen(),
  MyAccountScreen()
 ];
 
@@ -57,10 +56,7 @@ void _onItemTapped(int index) {
             icon: Icon(Icons.yard),
             label: 'Grocery',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_grocery_store),
-            label: 'Cart',
-          ),
+        
            BottomNavigationBarItem(
             icon: Icon(Icons.account_circle),
             label: 'Account',

@@ -83,7 +83,7 @@ double itemWidth = MediaQuery.of(context).size.width * 0.90;
                             children: [
                                  Icon(Icons.stars, color: AppColors.primaryColor,size: ScreenUtil().setSp(14.0),),
                                SizedBox(width: 2.0,),
-                                 Text("4.7", style: TextStyle(fontFamily: FONT_FAMILY, color: AppColors.blackcolor, fontSize: ScreenUtil().setSp(13.0)),)
+                                 Text("${topRestaurantsModel?.rating ?? '0'}", style: TextStyle(fontFamily: FONT_FAMILY, color: AppColors.blackcolor, fontSize: ScreenUtil().setSp(13.0)),)
                             ],
                            ),
                            SizedBox(height: 2.0,),

@@ -197,7 +197,10 @@ void MenuDialog(context){
     },
       child: Scaffold(
         backgroundColor: AppColors.whitecolor,
-        floatingActionButton: Column(
+        floatingActionButton: 
+        (!loading && (restaurantandDishesModel?.menus?.length ?? 0) > 0)
+        ?
+        Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             SlideInRight(
@@ -235,7 +238,7 @@ void MenuDialog(context){
       },
     )
           ],
-        ),
+        ) : null,
         appBar: AppBar(
       leading: IconButton(
       icon: Icon(Icons.arrow_back, color: Colors.black, size: ScreenUtil().setSp(25.0)),
@@ -295,7 +298,7 @@ void MenuDialog(context){
                            children: [
                                 Icon(Icons.stars, color: AppColors.primaryColor,size: ScreenUtil().setSp(15.0),),
                               SizedBox(width: 2.0,),
-                                Text("4.7", style: TextStyle(fontFamily: "Poppins", color: AppColors.blackcolor, fontSize: ScreenUtil().setSp(13.0)),),
+                                Text("${restaurantandDishesModel?.rating ?? '0'}", style: TextStyle(fontFamily: "Poppins", color: AppColors.blackcolor, fontSize: ScreenUtil().setSp(13.0)),),
                               SizedBox(width: 2.0,),
                             Text("Ratings", maxLines: 2,style: TextStyle(fontFamily: "Poppins", overflow: TextOverflow.ellipsis,fontWeight: FontWeight.normal, color: AppColors.pricecolor, fontSize: ScreenUtil().setSp(14.0)),)
                            

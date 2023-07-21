@@ -6,10 +6,14 @@ import 'package:qfoods/constants/api_services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:qfoods/model/GroceryCartModel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class GroceryCartServices{
   Future<GroceryCartModel> getCart() async{
     GroceryCartModel groceryCartModel = GroceryCartModel();
-    String userid = "1";
+     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+    if(user_id == null) groceryCartModel;
+    String userid = user_id!.toString();
     print(ApiServices.grocery_get_cart + userid);
     final uri = Uri.parse(ApiServices.grocery_get_cart + userid);
     final response = await http.get(uri);
@@ -26,7 +30,9 @@ class GroceryCartServices{
 
  Future<GroceryCartModel> addCart(dynamic data) async{
     GroceryCartModel groceryCartModel = GroceryCartModel();
-    String userid = "1";
+     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+    if(user_id == null) groceryCartModel;
     final uri = Uri.parse(ApiServices.grocery_add_cart);
     var jsonString = json.encode(data);
      var header ={
@@ -51,7 +57,10 @@ class GroceryCartServices{
 
 Future<GroceryCartModel> VariantUpdateQuantity(String cart_id, String type) async{
     GroceryCartModel groceryCartModel = GroceryCartModel();
-    String userid = "1";
+     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+    if(user_id == null) groceryCartModel;
+    String userid =user_id!.toString();
     print("${ApiServices.grocery_variant_update_quantity}${userid}/${cart_id}?type=${type}");
     final uri = Uri.parse("${ApiServices.grocery_variant_update_quantity}${userid}/${cart_id}?type=${type}");
    
@@ -73,7 +82,10 @@ Future<GroceryCartModel> VariantUpdateQuantity(String cart_id, String type) asyn
 
 Future<GroceryCartModel> UpdateQuantity(String cart_id, String type) async{
     GroceryCartModel groceryCartModel = GroceryCartModel();
-    String userid = "1";
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user_id = await prefs.getInt("qfoods_user_id") ?? null;
+    if(user_id == null) groceryCartModel;
+    String userid =user_id!.toString();
     final uri = Uri.parse("${ApiServices.grocery_update_quantity}${userid}/${cart_id}?type=${type}");
    
     final response = await http.get(uri);

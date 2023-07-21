@@ -7,6 +7,7 @@ class RestaurantandDishesModel {
   String? address;
   String? phoneNumber;
   int? status;
+  String? rating;
   List<SearchResults>? searchResults;
   List<Menus>? menus;
 
@@ -19,6 +20,7 @@ class RestaurantandDishesModel {
       this.address,
       this.phoneNumber,
       this.status,
+      this.rating,
       this.searchResults,
       this.menus});
 
@@ -31,6 +33,7 @@ class RestaurantandDishesModel {
     address = json['address'];
     phoneNumber = json['phone_number'];
     status = json['status'];
+    rating = json['rating'];
     if (json['search_results'] != null) {
       searchResults = <SearchResults>[];
       json['search_results'].forEach((v) {
@@ -55,6 +58,7 @@ class RestaurantandDishesModel {
     data['address'] = this.address;
     data['phone_number'] = this.phoneNumber;
     data['status'] = this.status;
+    data['rating']  = this.rating;
     if (this.searchResults != null) {
       data['search_results'] =
           this.searchResults!.map((v) => v.toJson()).toList();
